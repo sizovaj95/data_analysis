@@ -315,6 +315,8 @@ turkey
 \bvealb
 venison
 \bboarb
+barbecue
+\bribs
 
 #Seafood#
 anchovy
@@ -405,6 +407,7 @@ octopus
 oyster
 shrimp
 squid
+shellfish
 
 #Sweet#
 desert
@@ -422,6 +425,7 @@ marmalade
 chocolat[ey]
 cake
 caramel
+oreo
 
 #Spices#
 cardamom
@@ -454,3 +458,13 @@ asphalt
 \boak\b
 talc
 chalk
+cheese
+sauce
+\boil\b
+
+#General dishes#
+\broasts\b
+stew
+\bpie
+ratatouille
+salad

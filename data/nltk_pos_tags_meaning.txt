@@ -1,6 +1,6 @@
-CC	coordinating conjunction
+CC	coordinating conjunction (and, or)
 CD	cardinal digit
-DT	determiner
+DT	determiner (a)
 EX	existential there (like: "there is" ... think of it like "there exists")
 FW	foreign word
 IN	preposition/subordinating conjunction
@@ -33,3 +33,4 @@ WDT	wh-determiner	which
 WP	wh-pronoun	who, what
 WP$	possessive wh-pronoun	whose
 WRB	wh-abverb	where, when
+','
