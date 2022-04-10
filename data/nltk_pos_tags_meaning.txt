@@ -3,7 +3,7 @@ CD	cardinal digit
 DT	determiner (a)
 EX	existential there (like: "there is" ... think of it like "there exists")
 FW	foreign word
-IN	preposition/subordinating conjunction
+IN	preposition/subordinating conjunction (like, that)
 JJ	adjective	'big'
 JJR	adjective, comparative	'bigger'
 JJS	adjective, superlative	'biggest'

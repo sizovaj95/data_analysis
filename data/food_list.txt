@@ -129,6 +129,49 @@ Winter Melon
 Yams
 Zucchini
 jalape.o
+Adzuki Beans?
+Anasazi Beans?
+Black Beans?
+Black Turtle Beans?
+Black-Eyed Peas?
+Borlotti
+Cranberry
+Butter Beans?
+Cannellini Beans?
+Christmas Lima Bean
+Chestnut Lima
+Corona Beans?
+Fava Beans?
+Broad Beans?
+Flageolet Beans?
+Garbanzo Beans?
+Chickpeas?
+Desi
+Bengal Gram
+Chana Dal
+Great Northern Beans
+Kidney Beans
+Lentils?
+Lima Beans?
+Butter Beans?
+Lupini Beans?
+Marrow Beans?
+Moth Beans?
+Mung Beans?
+Navy Beans?
+Pigeon Pea
+Pink Beans?
+Pinto Beans?
+Red Beans?
+Small Red Beans?
+Rice Beans?
+Scarlet Runner Beans?
+Soybean
+Soya Bean
+Spanish Tolosana Beans?
+Split Peas?
+Tepary Beans?
+Urad
 
 #Fruits#
 fruit
@@ -204,51 +247,6 @@ Tangelo
 Tomato
 kumquat
 
-#Beans#
-Adzuki Beans?
-Anasazi Beans?
-Black Beans?
-Black Turtle Beans?
-Black-Eyed Peas?
-Borlotti
-Cranberry
-Butter Beans?
-Cannellini Beans?
-Christmas Lima Bean
-Chestnut Lima
-Corona Beans?
-Fava Beans?
-Broad Beans?
-Flageolet Beans?
-Garbanzo Beans?
-Chickpeas?
-Desi
-Bengal Gram
-Chana Dal
-Great Northern Beans
-Kidney Beans
-Lentils?
-Lima Beans?
-Butter Beans?
-Lupini Beans?
-Marrow Beans?
-Moth Beans?
-Mung Beans?
-Navy Beans?
-Pigeon Pea
-Pink Beans?
-Pinto Beans?
-Red Beans?
-Small Red Beans?
-Rice Beans?
-Scarlet Runner Beans?
-Soybean
-Soya Bean
-Spanish Tolosana Beans?
-Split Peas?
-Tepary Beans?
-Urad
-
 #Berries#
 Acai Berry
 Barberry
@@ -317,6 +315,7 @@ venison
 \bboarb
 barbecue
 \bribs
+boar
 
 #Seafood#
 anchovy
@@ -408,6 +407,7 @@ oyster
 shrimp
 squid
 shellfish
+\bclam
 
 #Sweet#
 desert
@@ -468,3 +468,12 @@ stew
 \bpie
 ratatouille
 salad
+pizza
+lasagna
+pasta
+carpaccio
+
+#Country Cuisine#
+Asian
+Indian
+Thai
