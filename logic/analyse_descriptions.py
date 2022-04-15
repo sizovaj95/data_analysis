@@ -1,3 +1,6 @@
+import constants as co
+import util as util
+
 import nltk
 import pandas as pd
 import re
@@ -7,65 +10,14 @@ from typing import List, Tuple, Dict, Optional
 from nltk.corpus import stopwords
 stop_words = set(stopwords.words("english"))
 
-import constants as co
 
-
-pair_with_re = [r"(enjoy(ed)?|pair(ed?)|\btry\b|served?|drink|combination|just the thing) .{,30}with",
+pair_with_re = [r"(enjoy(ed)?|pair(ed?)|\btry\b|\bserved?|drink|combination|just the thing) .{,30}with",
                 r"would make a great companion to",
                 r"would be .{1,10}with",
                 r"perfect( pairing)? for",
                 r"(pairing|ideal|match) (for|to)",
                 r"to (partner|perk up)",
-                r"wants some .{,30}cooking to go with it",
-                r"with wide variety of (fare|food|dish)"]
-
-TAGGED_WORDS = List[Tuple[str, str]]
-
-
-class TaggedWordsUtil:
-    def __init__(self, tagged_words: TAGGED_WORDS, custom_tags: List[str]):
-        self.tagged_words = tagged_words
-        self.custom_tags = custom_tags
-
-    @property
-    def words_only(self) -> List[str]:
-        return self.get_words(self.tagged_words)
-
-    @property
-    def pos_only(self) -> List[str]:
-        return self.get_pos(self.tagged_words)
-
-    def get_only_custom_tags(self, tagged_words: TAGGED_WORDS):
-        return [tag[1] for tag in tagged_words if tag[1] in self.custom_tags]
-
-    @staticmethod
-    def get_words(tagged_words: TAGGED_WORDS):
-        return [tup[0] for tup in tagged_words]
-
-    @staticmethod
-    def get_pos(tagged_words: TAGGED_WORDS):
-        return [tup[1] for tup in tagged_words]
-
-    def check_if_pos_tag_in_list(self, tagged_words: TAGGED_WORDS, check_tag_list: List[str]) -> bool:
-        for check_tag in check_tag_list:
-            if check_tag in self.get_pos(tagged_words):
-                return True
-        return False
-
-    @staticmethod
-    def split_by_pos_tag(tagged_words: TAGGED_WORDS, splitting_tag: str) -> Tuple[TAGGED_WORDS, TAGGED_WORDS]:
-        before_tag = []
-        after_tag = []
-        tag_found = False
-        for word, tag in tagged_words:
-            if tag == splitting_tag:
-                tag_found = True
-                continue
-            if not tag_found:
-                before_tag.append((word, tag))
-            else:
-                after_tag.append((word, tag))
-        return before_tag, after_tag
+                r"wants some .{,30}cooking to go with it"]
 
 
 def load_my_food() -> dict:
@@ -105,36 +57,48 @@ def combine_results_of_two_taggers(tagged_words_main: List[tuple], tagged_words_
     return tagged_words_main
 
 
-def split_and_strip_food_phrase(tagged_words_util: TaggedWordsUtil) -> List[Tuple[str, List[str]]]:
-    """E.g. split 'rich meats or mushrooms' into 'rick meats', 'mushrooms'"""
-    tagged_words = tagged_words_util.tagged_words
-    tagged_words = strip_extra_characters(tagged_words)
-    pairing_as_str = ' '.join(tagged_words_util.get_words(tagged_words))
-    pairings_with_pos = [(pairing_as_str, tagged_words_util.get_only_custom_tags(tagged_words))]
+def split_potential_pairings_into_parts_by_tags(tagged_words: co.TAGGED_WORDS) -> List[co.TAGGED_WORDS]:
+    parts = []
     for word, tag in tagged_words:
-        if tag == "CC":
-            before_tag, after_tag = tagged_words_util.split_by_pos_tag(tagged_words, 'CC')
-            pairings_with_pos = \
-                [(' '.join(tagged_words_util.get_words(before_tag)), tagged_words_util.get_only_custom_tags(before_tag)),
-                 (' '.join(tagged_words_util.get_words(after_tag)), tagged_words_util.get_only_custom_tags(after_tag))]
-
-        elif tag == ",":
-            before_tag, after_tag = tagged_words_util.split_by_pos_tag(tagged_words, ',')
-            if tagged_words_util.check_if_pos_tag_in_list(before_tag, tagged_words_util.custom_tags) and\
-                    tagged_words_util.check_if_pos_tag_in_list(after_tag, tagged_words_util.custom_tags):
-                pairings_with_pos = \
-                    [(' '.join(tagged_words_util.get_words(before_tag)), tagged_words_util.get_only_custom_tags(before_tag)),
-                     (' '.join(tagged_words_util.get_words(after_tag)), tagged_words_util.get_only_custom_tags(after_tag))]
-            else:
-                pairings_with_pos = \
-                    [(' '.join(tagged_words_util.words_only),
-                      tagged_words_util.get_only_custom_tags(tagged_words))]
-
-    pairings_with_pos = [(phrase.strip(), pos) for phrase, pos in pairings_with_pos if pos]
-    return pairings_with_pos
+        if tag == 'CC' or tag == ',':
+            before_tag, after_tag = util.split_by_pos_tag(tagged_words, tag)
+            parts.extend(split_potential_pairings_into_parts_by_tags(before_tag))
+            parts.extend(split_potential_pairings_into_parts_by_tags(after_tag))
+            break
+    else:
+        return [tagged_words]
+    return parts
 
 
-def strip_extra_characters(tagged_words: TAGGED_WORDS) -> TAGGED_WORDS:
+def split_and_strip_food_phrase(tagged_words: co.TAGGED_WORDS, custom_tags: List[str]):
+    """E.g. split 'rich meats or mushrooms' into 'rich meats', 'mushrooms'"""
+
+    pairing_parts = split_potential_pairings_into_parts_by_tags(tagged_words)
+    pairings = []
+
+    for i, part in enumerate(pairing_parts):
+        if util.check_if_pos_tag_in_list(part, custom_tags):
+            part = strip_extra_characters(part)
+            pairings.append(part)
+        else:
+            part = _maybe_remove_part_of_pairing(part)
+            if part != [('', '')]:
+                try:
+                    part += pairing_parts[i+1]
+                    pairing_parts[i+1] = part
+                except IndexError:
+                    continue
+    return pairings
+
+
+def _maybe_remove_part_of_pairing(tagged_words: co.TAGGED_WORDS) -> co.TAGGED_WORDS:
+    if len(tagged_words) == 1 and tagged_words[0][1] in ['JJ', 'NN', 'VBN']:
+        return tagged_words
+    else:
+        return [('', '')]
+
+
+def strip_extra_characters(tagged_words: co.TAGGED_WORDS) -> co.TAGGED_WORDS:
     """E.g. 'a steak' -> 'steak'"""
     clean_tagged_words = deepcopy(tagged_words)
     for word, tag in tagged_words:
@@ -167,14 +131,15 @@ def organise_pairings_tuple_into_dict(pairing_tuples_list: List[Tuple[str, List[
     return pairing_dict
 
 
-def extract_pairing_food(tagged_words_util: TaggedWordsUtil) -> dict:
+def extract_pairing_food(tagged_words: co.TAGGED_WORDS, custom_tags: List[str]) -> dict:
     pairing_dict = {}
     i = 1
-    for word, tag in tagged_words_util.tagged_words[::-1]:
-        if tag in tagged_words_util.custom_tags:
-            pairing_tup = [tup for tup in tagged_words_util.tagged_words[:-i+1]]
-            tagged_words_util.tagged_words = pairing_tup
-            pairings = split_and_strip_food_phrase(tagged_words_util)
+    for word, tag in tagged_words[::-1]:
+        if tag in custom_tags:
+            pairing_tup = [tup for tup in tagged_words[:-i+1]]
+            tagged_words = pairing_tup
+            pairings = split_and_strip_food_phrase(tagged_words, custom_tags)
+            pairings = organise_pairings_into_phrases_and_food_tags(pairings, custom_tags)
             pairing_dict = organise_pairings_tuple_into_dict(pairings)
             print(pairings)
             break
@@ -182,7 +147,17 @@ def extract_pairing_food(tagged_words_util: TaggedWordsUtil) -> dict:
     return pairing_dict
 
 
-def get_tagged_words(words: List[str], regex_tagger: nltk.tag.RegexpTagger) -> TAGGED_WORDS:
+def organise_pairings_into_phrases_and_food_tags(pairings: List[co.TAGGED_WORDS], custom_tags: List[str]) -> \
+        List[Tuple[str, List[str]]]:
+    pairings_with_pos = []
+    for pairing in pairings:
+        pairings_with_pos.append((' '.join(util.get_words(pairing)),
+                                 util.get_only_custom_tags(pairing, custom_tags)))
+    pairings_with_pos = [(phrase.strip(), pos) for phrase, pos in pairings_with_pos if pos]
+    return pairings_with_pos
+
+
+def get_tagged_words(words: List[str], regex_tagger: nltk.tag.RegexpTagger) -> co.TAGGED_WORDS:
     words = [w.lower() for w in words]
     tagged_words_default = nltk.pos_tag(words)
     tagged_words_regex = regex_tagger.tag(words)
@@ -203,10 +178,9 @@ def find_pairing_food(df: pd.DataFrame, regex_tagger: nltk.tag.RegexpTagger, cus
                 before_pair = sent[:match.end()]
                 after_words = nltk.tokenize.word_tokenize(after_pair)
                 before_words = nltk.tokenize.word_tokenize(before_pair)
-                tagged_words_ = get_tagged_words(after_words, regex_tagger)
-                tagged_words = TaggedWordsUtil(tagged_words_, custom_tags)
+                tagged_words = get_tagged_words(after_words, regex_tagger)
 
-                pairing_dict = extract_pairing_food(tagged_words)
+                pairing_dict = extract_pairing_food(tagged_words, custom_tags)
                 if pairing_dict:
                     print(sent)
                 else:

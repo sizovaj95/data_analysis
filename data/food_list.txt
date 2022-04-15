@@ -298,7 +298,6 @@ Wheat
 bacon
 beef
 chicken
-crab
 duck
 goose
 lamb
@@ -477,3 +476,6 @@ carpaccio
 Asian
 Indian
 Thai
+French
+Italian
+Mexican
