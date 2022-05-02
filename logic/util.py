@@ -1,6 +1,9 @@
+import re
 from typing import List, Tuple, Dict, Optional
+from copy import deepcopy
+from collections import defaultdict
 
-import constants as co
+from logic import constants as co
 
 
 def get_only_custom_tags(tagged_words: co.TAGGED_WORDS, custom_tags: List[str]) -> List[str]:
@@ -35,3 +38,37 @@ def split_by_pos_tag(tagged_words: co.TAGGED_WORDS, splitting_tag: str) -> Tuple
         else:
             after_tag.append((word, tag))
     return before_tag, after_tag
+
+
+def get_n_words_before_or_after_keyword(tagged_words: co.TAGGED_WORDS, keyword: str, n: int, before_keyword: bool) ->\
+        co.TAGGED_WORDS:
+    tagged_words_ = deepcopy(tagged_words)
+    if len(tagged_words_) <= n:
+        return []
+    if not re.search(keyword, ' '.join(get_words(tagged_words_)), re.I):
+        return []
+    selected_words = []
+    if before_keyword:
+        tagged_words_.reverse()
+    for i, (word, pos) in enumerate(tagged_words_):
+        if word == keyword:
+            selected_words.extend(tagged_words_[i+1:i+n+1])
+            break
+
+    if before_keyword:
+        selected_words.reverse()
+    return selected_words
+
+
+def load_my_food() -> dict:
+    with open(co.data_dir / 'food_list.txt', 'r') as f:
+        my_food_list = f.read()
+
+    categories = re.split(r"(?=#.*?#)", my_food_list)
+    categories = [cat for cat in categories if cat]
+    my_food_dict = defaultdict()
+    for cat in categories:
+        food_list = cat.split('\n')
+        title = re.search(r"#(.*?)#", food_list[0])[1].lower()
+        my_food_dict[title] = [fr"{food_item.lower().strip()}" for food_item in food_list[1:] if food_item]
+    return my_food_dict

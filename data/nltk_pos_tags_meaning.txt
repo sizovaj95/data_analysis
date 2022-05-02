@@ -17,7 +17,7 @@ PDT	predeterminer	'all the kids'
 POS	possessive ending	parent\'s
 PRP	personal pronoun	I, he, she
 PRP$	possessive pronoun	my, his, hers
-RB	adverb	very, silently,
+RB	adverb	very, silently,   soon
 RBR	adverb, comparative	better
 RBS	adverb, superlative	best
 RP	particle	give up

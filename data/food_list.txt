@@ -135,7 +135,6 @@ Black Beans?
 Black Turtle Beans?
 Black-Eyed Peas?
 Borlotti
-Cranberry
 Butter Beans?
 Cannellini Beans?
 Christmas Lima Bean
@@ -224,7 +223,7 @@ Valencia
 Papaya
 Passion Fruit
 Peach
-Pear
+\bPear
 Asian Pear
 Persimmon
 Pineapple
@@ -309,31 +308,31 @@ quail
 rabbit
 steak
 turkey
-\bvealb
+\bveal\b
 venison
-\bboarb
+\bboar\b
 barbecue
 \bribs
-boar
 
 #Seafood#
+seafood
 anchovy
-\bbarbb
+\bbarb\b
 barracuda
-\bbassb
+\bbass\b
 blenny
 tuna
 bonito
 \bcarp\b
-\bhubb
-\bcodb
+\bhub\b
+\bcod\b
 coelacanth
 crappie
 darter
 devil ray
 \bdory\b
 Dunkleosteus
-\beelb
+\beel\b
 elver
 fish\b
 flounder
@@ -407,6 +406,7 @@ shrimp
 squid
 shellfish
 \bclam
+calamari
 
 #Sweet#
 desert
@@ -425,38 +425,33 @@ chocolat[ey]
 cake
 caramel
 oreo
+souffl.
 
 #Spices#
 cardamom
 cinnamon
-pepper\b
+black pepper\b
+white pepper\b
 clove
 spice
 nutmeg
 star anise
 thyme
 dill
+peppercorn
+minty?\b
+\bherbs?\b
 
 #Other#
 coffee
 mocha
 cigar
-graphite
 spring flower
 almond
 \btea\b
-tobacco
 butterscotch
-cedar
-peppercorn
 cider
-minty?\b
-\bherb\b
 espresso
-asphalt
-\boak\b
-talc
-chalk
 cheese
 sauce
 \boil\b
@@ -471,6 +466,16 @@ pizza
 lasagna
 pasta
 carpaccio
+sushi
+risotto
+curry
+burger
+noodles
+french fries
+flamiche
+\budon\b
+tempura
+unagi
 
 #Country Cuisine#
 Asian
@@ -479,3 +484,8 @@ Thai
 French
 Italian
 Mexican
+Chinese
+Japanese
+Russian
+Mediterranean
+Oriental
