@@ -2,33 +2,64 @@ import pandas as pd
 import nltk
 from typing import Tuple, Dict, List, Optional
 import re
-import pickle
 import json
+import spacy
 
 from logic import constants as co
 from logic import util as util
+
+nlp = spacy.load("en_core_web_sm")
 
 
 TRAINING_DATA = []
 
 
 def convert_sentence_into_training_item(sentence: str, food_dict: Dict[str, List[str]]) -> Optional[Tuple[str, dict]]:
-    main_food_cat = ["meat and poultry", "seafood", "general dishes", "country cuisine"]
+    main_food_cat = ["meat and poultry", "seafood", "general dishes", "country cuisine", "fruits"]
     entities = []
     for food_cat, food in food_dict.items():
         if food_cat not in main_food_cat:
             food_cat = 'other'
+        food_cat = re.subn(r'\s', '_', food_cat)[0]
         food_cat = f"food_{food_cat}".upper()
-        food_re = r"|".join(food)
+        food_re = r"\b" + r"|\b".join(food)
         if matches := list(re.finditer(food_re, sentence, re.I)):
             for match in matches:
-                entities.append((match.start(), match.end(), food_cat))
+                # start_ind = find_true_match_start(sentence, match.start())
+                end_ind = find_true_match_end(sentence, match.end())
+                entities.append((match.start(), end_ind, food_cat))
     if entities:
         entities = remove_overlapping_entities(entities)
         training_item = (sentence, {'entities': entities})
     else:
         training_item = None
     return training_item
+
+
+# def find_true_match_start(sentence: str, start_ind: int):
+#     """Sublime != lime"""
+#     start_ind -= 1
+#     start_char = sentence[start_ind]
+#     while not re.search(r"\W", start_char) and start_ind != -1:
+#         start_ind -= 1
+#         start_char = sentence[start_ind]
+#     return start_ind + 1
+
+
+def find_true_match_end(sentence: str, end_ind: int) -> int:
+    """For plurals and punctuation.
+    E.g. 'black fruits', have to match whole phrase, but only matched 'black fruit'"""
+    try:
+        end_char = sentence[end_ind]
+    except IndexError:
+        return end_ind
+    while not re.search(r"\W", end_char):
+        end_ind += 1
+        try:
+            end_char = sentence[end_ind]
+        except IndexError:
+            return end_ind
+    return end_ind
 
 
 def adjust_food_dict(food_dict: Dict[str, List[str]]):
@@ -76,10 +107,11 @@ def main():
             if training_example:
                 TRAINING_DATA.append(training_example)
     with open(co.data_dir / "ner_training_data.json", "w") as f:
-        json.dump(TRAINING_DATA, f)
+        json.dump(TRAINING_DATA, f, indent=1)
 
 
 if __name__ == "__main__":
-    with open(co.data_dir / "ner_training_data.json", 'r') as f:
-        data = json.load(f)
-        data
+    main()
+    # with open(co.data_dir / "ner_training_data.json", 'r') as f:
+    #     data = json.load(f)
+    #     data

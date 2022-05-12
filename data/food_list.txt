@@ -200,7 +200,7 @@ Jujube
 Kiwifruit
 Kumquat
 Lemon
-Lime
+\bLime
 Longan
 Loquat
 Lucuma
@@ -221,7 +221,7 @@ Navel
 Seville
 Valencia
 Papaya
-Passion Fruit
+Passion\s?Fruit
 Peach
 \bPear
 Asian Pear
@@ -274,6 +274,7 @@ black[\s-]fruit
 berry
 cassis
 berries
+watermelon
 
 #Grains#
 Amaranth

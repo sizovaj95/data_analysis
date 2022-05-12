@@ -15,3 +15,9 @@ winery = "winery"
 province = "province"
 points_group = "points_group"
 log10_price = "log10_price"
+
+
+food_labels = ["FOOD_MEAT_AND_POULTRY", "FOOD_SEAFOOD", "FOOD_GENERAL_DISHES", "FOOD_COUNTRY_CUISINE", "FOOD_FRUITS",
+               "FOOD_OTHER"]
+
+custom_nlp_model_name = 'custom_ner_2022_5_10_147236'
