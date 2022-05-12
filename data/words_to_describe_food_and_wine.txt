@@ -210,3 +210,12 @@ well-balanced
 well-structured
 wonderful
 young
+
+#Weird flavors#
+graphite
+tobacco
+cedar
+asphalt
+\boak\b
+talc
+chalk

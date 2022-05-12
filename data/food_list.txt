@@ -129,89 +129,12 @@ Winter Melon
 Yams
 Zucchini
 jalape.o
-
-#Fruits#
-fruit
-Apple
-Apricot
-Avocado
-Banana
-Berries
-Breadfruit
-Carob
-Cherry
-Citron
-Coconut
-Date
-Dragon Fruit
-Pitaya
-Durian
-Fig
-Ginger
-Grapes?
-Currant
-Raisin
-Grapefruit
-Guava
-Jackfruit
-Jujube
-Kiwifruit
-Kumquat
-Lemon
-Lime
-Longan
-Loquat
-Lucuma
-Lychee
-Mamey Sapote
-Mango
-Mangosteen
-Melon
-Nance
-Nectarine
-Noni
-Orange
-Blood Orange
-Mandarin
-Clementine
-Satsuma
-Navel
-Seville
-Valencia
-Papaya
-Passion Fruit
-Peach
-Pear
-Asian Pear
-Persimmon
-Pineapple
-Plantain
-Plum
-Damson
-Prunes
-Pomegranate
-Pomelo
-Prickly Pear
-Cactus Pear
-Quince
-Rambutan
-Rhubarb
-Starfruit
-Tamarillo
-Tamarind
-Tangerine
-Tangelo
-Tomato
-kumquat
-
-#Beans#
 Adzuki Beans?
 Anasazi Beans?
 Black Beans?
 Black Turtle Beans?
 Black-Eyed Peas?
 Borlotti
-Cranberry
 Butter Beans?
 Cannellini Beans?
 Christmas Lima Bean
@@ -249,6 +172,80 @@ Split Peas?
 Tepary Beans?
 Urad
 
+#Fruits#
+fruit
+Apple
+Apricot
+Avocado
+Banana
+Berries
+Breadfruit
+Carob
+Cherry
+Citron
+Coconut
+Date
+Dragon Fruit
+Pitaya
+Durian
+Fig
+Ginger
+Grapes?
+Currant
+Raisin
+Grapefruit
+Guava
+Jackfruit
+Jujube
+Kiwifruit
+Kumquat
+Lemon
+\bLime
+Longan
+Loquat
+Lucuma
+Lychee
+Mamey Sapote
+Mango
+Mangosteen
+Melon
+Nance
+Nectarine
+Noni
+Orange
+Blood Orange
+Mandarin
+Clementine
+Satsuma
+Navel
+Seville
+Valencia
+Papaya
+Passion\s?Fruit
+Peach
+\bPear
+Asian Pear
+Persimmon
+Pineapple
+Plantain
+Plum
+Damson
+Prunes
+Pomegranate
+Pomelo
+Prickly Pear
+Cactus Pear
+Quince
+Rambutan
+Rhubarb
+Starfruit
+Tamarillo
+Tamarind
+Tangerine
+Tangelo
+Tomato
+kumquat
+
 #Berries#
 Acai Berry
 Barberry
@@ -277,6 +274,7 @@ black[\s-]fruit
 berry
 cassis
 berries
+watermelon
 
 #Grains#
 Amaranth
@@ -300,7 +298,6 @@ Wheat
 bacon
 beef
 chicken
-crab
 duck
 goose
 lamb
@@ -312,28 +309,31 @@ quail
 rabbit
 steak
 turkey
-\bvealb
+\bveal\b
 venison
-\bboarb
+\bboar\b
+barbecue
+\bribs
 
 #Seafood#
+seafood
 anchovy
-\bbarbb
+\bbarb\b
 barracuda
-\bbassb
+\bbass\b
 blenny
 tuna
 bonito
 \bcarp\b
-\bhubb
-\bcodb
+\bhub\b
+\bcod\b
 coelacanth
 crappie
 darter
 devil ray
 \bdory\b
 Dunkleosteus
-\beelb
+\beel\b
 elver
 fish\b
 flounder
@@ -405,6 +405,9 @@ octopus
 oyster
 shrimp
 squid
+shellfish
+\bclam
+calamari
 
 #Sweet#
 desert
@@ -422,35 +425,68 @@ marmalade
 chocolat[ey]
 cake
 caramel
+oreo
+souffl.
 
 #Spices#
 cardamom
 cinnamon
-pepper\b
+black pepper\b
+white pepper\b
 clove
 spice
 nutmeg
 star anise
 thyme
 dill
+peppercorn
+minty?\b
+\bherbs?\b
 
 #Other#
 coffee
 mocha
 cigar
-graphite
 spring flower
 almond
 \btea\b
-tobacco
 butterscotch
-cedar
-peppercorn
 cider
-minty?\b
-\bherb\b
 espresso
-asphalt
-\boak\b
-talc
-chalk
+cheese
+sauce
+\boil\b
+
+#General dishes#
+\broasts\b
+stew
+\bpie
+ratatouille
+salad
+pizza
+lasagna
+pasta
+carpaccio
+sushi
+risotto
+curry
+burger
+noodles
+french fries
+flamiche
+\budon\b
+tempura
+unagi
+
+#Country Cuisine#
+Asian
+Indian
+Thai
+French
+Italian
+Mexican
+Chinese
+Japanese
+Russian
+Mediterranean
+Oriental

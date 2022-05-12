@@ -1,9 +1,9 @@
-CC	coordinating conjunction
+CC	coordinating conjunction (and, or)
 CD	cardinal digit
-DT	determiner
+DT	determiner (a)
 EX	existential there (like: "there is" ... think of it like "there exists")
 FW	foreign word
-IN	preposition/subordinating conjunction
+IN	preposition/subordinating conjunction (like, that)
 JJ	adjective	'big'
 JJR	adjective, comparative	'bigger'
 JJS	adjective, superlative	'biggest'
@@ -17,7 +17,7 @@ PDT	predeterminer	'all the kids'
 POS	possessive ending	parent\'s
 PRP	personal pronoun	I, he, she
 PRP$	possessive pronoun	my, his, hers
-RB	adverb	very, silently,
+RB	adverb	very, silently,   soon
 RBR	adverb, comparative	better
 RBS	adverb, superlative	best
 RP	particle	give up
@@ -33,3 +33,4 @@ WDT	wh-determiner	which
 WP	wh-pronoun	who, what
 WP$	possessive wh-pronoun	whose
 WRB	wh-abverb	where, when
+','
