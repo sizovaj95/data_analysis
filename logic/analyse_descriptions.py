@@ -9,13 +9,17 @@ from collections import defaultdict
 from copy import deepcopy
 from typing import List, Tuple, Dict, Optional, Union
 from nltk.corpus import stopwords
+import time
 stop_words = set(stopwords.words("english"))
 
 output_dir = co.data_dir / co.custom_nlp_model_name
 nlp = spacy.load(output_dir)
 
+my_food_dict = None
+wine_adjectives = None
 
-pair_with_re = [r"(enjoy(ed)?|pair(ed)?|\btry\b|\bserved?|combination|just the thing) .{,30}with",
+
+pair_with_re = [r"(enjoy(ed)?|pair(ed|ing)?|\btry\b|\bserved?|combination|just the thing) .{,30}with",
                 r"would make a great companion to",
                 r"would be .{1,10}with",
                 r"perfect( pairing)? for",
@@ -24,18 +28,25 @@ pair_with_re = [r"(enjoy(ed)?|pair(ed)?|\btry\b|\bserved?|combination|just the t
                 r"wants some .{,30}cooking to go with it",
                 r"drink(ing)? .{0,10}with"]
 
+flavor_re = r"aroma|character|flavor|\bhints?\b|\btone\b|accents?\b|scents?\b"
+
 verbs = ['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']
 
 
-def strip_extra_characters(tagged_words: co.TAGGED_WORDS) -> co.TAGGED_WORDS:
-    """E.g. 'a steak' -> 'steak'"""
-    clean_tagged_words = deepcopy(tagged_words)
-    for word, tag in tagged_words:
-        if tag in ["DT", "IN", ","]:
-            clean_tagged_words.remove((word, tag))
-        else:
-            break
-    return clean_tagged_words
+def maybe_load_my_food_dict() -> Dict[str, List[str]]:
+    global my_food_dict
+    if my_food_dict is None:
+        my_food_dict = util.load_my_food()
+    return my_food_dict
+
+
+def maybe_load_wine_adjectives() -> List[str]:
+    global wine_adjectives
+    if not wine_adjectives:
+        with open(co.data_dir / 'words_to_describe_wine.txt', 'r') as f:
+            wine_adj_str = f.read()
+            wine_adjectives = [adj.lower() for adj in re.split(r"\n", wine_adj_str) if adj]
+    return wine_adjectives
 
 
 def organise_pairings_tuple_into_dict(pairing_tuples_list: List[Tuple[str, List[str]]]) -> Dict[str, list]:
@@ -66,50 +77,53 @@ def is_false_positive(sentence: Span, noun_phrases: List[Span]) -> bool:
     """E.g. 'An easy drinking wine, with pleasantly tart cherry flavors.'"""
     is_fp = False
     food_ents = [ent.label_ for noun_phrase in noun_phrases for ent in noun_phrase.ents]
-    if all([True if ent == 'FOOD_FRUITS' else False for ent in food_ents]) and\
-            re.search(r"flavor|aroma|tannin", sentence.text, re.I):
-        is_fp = True
+    if all([True if ent == 'FOOD_FRUITS' else False for ent in food_ents]):
+        if re.search(r"flavor|aroma|tannin", sentence.text, re.I) or \
+                (len(food_ents) == 1 and re.search('fruit', noun_phrases[0].text, re.I)):
+            is_fp = True
     return is_fp
 
 
-def filter_noun_phrases(noun_phrases: List[Span], start_ind: int) -> List[Span]:
-    """Only leave phrases with FOOD entities, located after pairing regex."""
+def filter_noun_phrases(noun_phrases: List[Span], start_ind: int, filter_list: Optional[List[str]] = None) ->\
+        List[Span]:
+    """Only leave phrases with FOOD entities or from 'filter_list', located after pairing regex."""
     filter_phrases = []
     for noun_phrase in noun_phrases:
         if noun_phrase.start_char < start_ind:
             continue
+        if util.check_if_keyword_present(noun_phrase.text, filter_list):
+            filter_phrases.append(noun_phrase)
+            continue
         for ent in noun_phrase.ents:
-            if ent.label_ in co.food_labels:
+            if ent.label_.startswith('FOOD_'):
                 filter_phrases.append(noun_phrase)
                 break
     return filter_phrases
 
 
-def _find_index_in_list_of_noun_chunks(list_: List[Span], search_term: str):
-    for i, item in enumerate(list_):
-        if re.search(search_term, item.text, re.I):
-            return i
-    return -1
-
-
 def find_head_tokens(phrase: Span) -> List[Token]:
+    """Find tokens along the dependency tree until reach the root of the sentence or after too many steps."""
     current_token = phrase.root
     head_tokens = []
-    while True:
+    i = 0
+    while i <= 10:
         if current_token.dep_ == 'ROOT':
             break
         head_tokens.append(current_token)
         next_index = current_token.head.i
         current_token = current_token.doc[next_index]
+        i += 1
     return head_tokens
 
 
 def _try_combine_phrases(phrase1: Span, phrase2: Span) -> Optional[Span]:
+    """Combine phrases if they are connected.
+    E.g. 'risotto' and 'grated cheese' into 'risotto with grated cheese'"""
     phrase2_head_tokens = find_head_tokens(phrase2)
     current_token = phrase1.root
     i = 0
     reached_common_base = False
-    while True:
+    while i <= 10:
         if i == 1 and current_token.tag_ not in ['IN']:
             break
         elif current_token in phrase2_head_tokens:
@@ -148,7 +162,10 @@ def try_combine_phrases(noun_phrases: List[Span]) -> List[Span]:
         return noun_phrases
     for ind in potential_ext_ind:
         if ind > 0:
-            extension_phrase = noun_phrases[ind]
+            try:
+                extension_phrase = noun_phrases[ind]
+            except IndexError:
+                break
             food_phrase = noun_phrases[ind - 1]
             combined_phrase = _try_combine_phrases(food_phrase, extension_phrase)
             if combined_phrase:
@@ -171,55 +188,118 @@ def maybe_add_to_noun_phrases_from_food_ents(food_ents: List[Span], noun_phrases
     return noun_phrases
 
 
-def extract_food_pairings(sent_nlp: Span, pairing_start: int) -> dict:
+def extract_food_pairings(sent_nlp: Span, pairing_start: int) -> Dict[str, List[str]]:
     # [(t.text, t.tag_, t.head.text) for t in sent_nlp]
     noun_phrases = [chunk for chunk in sent_nlp.noun_chunks]
     noun_phrases = filter_noun_phrases(noun_phrases, pairing_start)
     food_spans = [ent for ent in sent_nlp.ents if ent.label_.startswith('FOOD_')]
     noun_phrases = maybe_add_to_noun_phrases_from_food_ents(food_spans, noun_phrases, pairing_start)
-    pairings = []
     if is_false_positive(sent_nlp, noun_phrases):
         return {}
     if len(noun_phrases) > 1:
         noun_phrases = try_combine_phrases(noun_phrases)
+    pairings = organise_noun_phrases_into_food_categories(noun_phrases)
+    pairings_dict = organise_pairings_tuple_into_dict(pairings)
+    return pairings_dict
+
+
+def organise_noun_phrases_into_food_categories(noun_phrases: List[Span]) -> List[Tuple[str, List[str]]]:
+    """List of noun chinks into tuple of text and respective food category."""
+    food_list = []
     for noun_phrase in noun_phrases:
         text = noun_phrase.text
         entities = []
         for ent in noun_phrase.ents:
             if ent.label_ in co.food_labels:
                 entities.append(ent.label_)
-        pairings.append((text, entities))
-    pairings_dict = organise_pairings_tuple_into_dict(pairings)
-    return pairings_dict
+        food_list.append((text, list(set(entities))))
+    return food_list
 
 
-def find_pairing_food(df: pd.DataFrame):
+def use_more_precise_food_categories(list_of_food_tuples: List[Tuple[str, List[str]]]) -> List[Tuple[str, List[str]]]:
+    """If food is of category OTHER, see if it can be given more precise category"""
+    for i, (food_text, food_ent) in enumerate(list_of_food_tuples):
+        if not food_ent:
+            food_ent = ['FOOD_OTHER']
+        for j, ent in enumerate(food_ent):
+            if not ent.endswith('OTHER'):
+                continue
+            food_cat = identify_food_sub_category(food_text)
+            if food_cat:
+                food_ent[j] = food_cat
+        list_of_food_tuples[i] = (food_text, food_ent)
+
+    return list_of_food_tuples
+
+
+def identify_food_sub_category(food_text: str) -> str:
+    """Check food text against food examples in food dict used for training.
+    A lot of categories were combined into 'OTHER', see if can be given subcategory, like 'SWEET'"""
+    food_dict = maybe_load_my_food_dict()
+    for food_cat, food_list in food_dict.items():
+        if util.check_if_keyword_present(food_text, food_list):
+            food_cat = f"FOOD_{food_cat}"
+            food_cat = re.subn(r"\s", '', food_cat)[0].upper()
+            return food_cat
+    return ''
+
+
+def extract_flavors(sent_nlp: Span) -> Dict[str, List[str]]:
+    noun_phrases = [chunk for chunk in sent_nlp.noun_chunks]
+    noun_phrases = filter_noun_phrases(noun_phrases, 0, co.weird_flavors)
+    food_spans = [ent for ent in sent_nlp.ents if ent.label_.startswith('FOOD_')]
+    noun_phrases = maybe_add_to_noun_phrases_from_food_ents(food_spans, noun_phrases, 0)
+    flavors = organise_noun_phrases_into_food_categories(noun_phrases)
+    flavors = use_more_precise_food_categories(flavors)
+    flavors_dict = organise_pairings_tuple_into_dict(flavors)
+
+    return flavors_dict
+
+
+def add_food_info_to_df(df: pd.DataFrame):
     data = deepcopy(df)
-    for i, row in data[0:5000].iterrows():
+    pairings_df = pd.DataFrame(index=list(data.index))
+    flavor_df = pd.DataFrame(index=list(data.index))
+    adjectives_df = pd.DataFrame(index=list(data.index))
+    wine_adj = maybe_load_wine_adjectives()
+    start = time.time()
+    for i, row in data.iterrows():
+
         text = row[co.description]
         text_nlp = nlp(text)
 
         for sent_nlp in text_nlp.sents:
             sent = sent_nlp.text
-        # for sent in sentences:
             if match := re.search('|'.join(pair_with_re), sent, re.I):
                 pairing_dict = extract_food_pairings(sent_nlp, sent_nlp.start_char + match.end())
-                if pairing_dict:
-                    print(sent)
-                    print(pairing_dict)
-                else:
-                    print(f"Non pairing sentence: {sent}")
-                print('\n')
-                for category, pairing_text in pairing_dict.items():
-                    if category not in data.columns:
-                        data[category] = pd.NaT
-                    data.at[i, category] = '. '.join(pairing_text)
+                pairings_df = populate_df_with_dict(pairings_df, pairing_dict, i)
+            if re.search(flavor_re, sent, re.I):
+                flavor_dict = extract_flavors(sent_nlp)
+                flavor_df = populate_df_with_dict(flavor_df, flavor_dict, i)
+            if adjectives := re.findall(r'\b|\b'.join(wine_adj), sent, re.I):
+                adj_dict = {"WINE_ADJECTIVES": adjectives}
+                adjectives_df = populate_df_with_dict(adjectives_df, adj_dict, i)
+        if i % 1000 == 0:
+            print(f"Analysed row {i} / {len(data)}")
+            print("Time taken for last 1000 rows: {:.2f} s".format(time.time() - start))
+            print('\n')
+            start = time.time()
+    pairings_df.to_csv(co.data_dir / "food_pairings.csv", index=False)
+    flavor_df.to_csv(co.data_dir / "food_flavors.csv", index=False)
+    adjectives_df.to_csv(co.data_dir / "wine_description_words.csv", index=False)
     return data
 
 
+def populate_df_with_dict(df: pd.DataFrame, dict_: dict, index: int) -> pd.DataFrame:
+    for category, pairing_text in dict_.items():
+        if category not in df.columns:
+            df[category] = pd.NaT
+        df.at[index, category] = '. '.join(pairing_text)
+    return df
+
+
 def analyse_descriptions(data: pd.DataFrame):
-    my_food_dict = util.load_my_food()
-    pairing_df = find_pairing_food(data)
+    add_food_info_to_df(data)
 
 
 if __name__ == "__main__":

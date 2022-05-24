@@ -21,3 +21,5 @@ food_labels = ["FOOD_MEAT_AND_POULTRY", "FOOD_SEAFOOD", "FOOD_GENERAL_DISHES", "
                "FOOD_OTHER"]
 
 custom_nlp_model_name = 'custom_ner_2022_5_10_147236'
+
+weird_flavors = [r"graphite", r"tobacco", r"cedar", r"asphalt", r"\boak\b", r"\btalc", r"chalk"]

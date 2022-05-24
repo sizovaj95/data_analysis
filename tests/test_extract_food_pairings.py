@@ -94,3 +94,37 @@ class TestFoodPairings(TestCase):
         expected = {'FOOD_SEAFOOD': ['shrimp stir fried in olive oil']}
         result = desc.extract_food_pairings(sent_nlp, pair_start)
         self.assertEqual(expected, result)
+
+    def test_extract_food_pairings_10(self):
+        test_sent = "On the palate, the wine has an appealing balance of chalkiness paired with exotic fruits."
+        sent_nlp = self.nlp(test_sent)
+        pair_start = test_sent.index('paired')
+        expected = {}
+        result = desc.extract_food_pairings(sent_nlp, pair_start)
+        self.assertEqual(expected, result)
+
+    def test_extract_food_pairings_11(self):
+        test_sent = "It will make a good pairing with pasta, roasted birds or grilled meat."
+        sent_nlp = self.nlp(test_sent)
+        pair_start = test_sent.index('pairing')
+        expected = {'FOOD_GENERAL_DISHES': ['pasta'],
+                    'FOOD_MEAT_AND_POULTRY': ['grilled meat']}
+        result = desc.extract_food_pairings(sent_nlp, pair_start)
+        self.assertEqual(expected, result)
+
+    def test_extract_food_pairings_12(self):
+        test_sent = "Great to drink now through 2020 with rich meats or mushrooms."
+        sent_nlp = self.nlp(test_sent)
+        pair_start = test_sent.index('drink')
+        expected = {'FOOD_MEAT_AND_POULTRY': ['rich meats'],
+                    'FOOD_OTHER': ['mushrooms']}
+        result = desc.extract_food_pairings(sent_nlp, pair_start)
+        self.assertEqual(expected, result)
+
+    def test_extract_food_pairings_13(self):
+        test_sent = ' Pair this with more elegant French dishes with a seafood slant.'
+        sent_nlp = self.nlp(test_sent)
+        pair_start = test_sent.index('Pair')
+        expected = {'FOOD_SEAFOOD': ['more elegant French dishes with a seafood slant']}
+        result = desc.extract_food_pairings(sent_nlp, pair_start)
+        self.assertEqual(expected, result)
