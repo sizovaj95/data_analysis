@@ -1,8 +1,9 @@
 import re
 from typing import List, Tuple, Dict, Optional
 from collections import defaultdict
+import itertools
 
-from logic import constants as co
+import constants as co
 
 
 def load_my_food() -> Dict[str, List[str]]:
@@ -24,3 +25,7 @@ def check_if_keyword_present(string: str, list_of_keywords: Optional[List[str]])
     if not list_of_keywords:
         return False
     return any([True if re.search(regex, string, re.I) else False for regex in list_of_keywords])
+
+
+def return_first_n_dict_items(dict_: dict, n: int) -> dict:
+    return dict(itertools.islice(dict_.items(), n))
