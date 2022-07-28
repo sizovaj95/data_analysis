@@ -1,8 +1,10 @@
 import re
 from typing import List, Tuple, Dict, Optional
 from collections import defaultdict
+import itertools
+import matplotlib.pyplot as plt
 
-from logic import constants as co
+import constants as co
 
 
 def load_my_food() -> Dict[str, List[str]]:
@@ -24,3 +26,31 @@ def check_if_keyword_present(string: str, list_of_keywords: Optional[List[str]])
     if not list_of_keywords:
         return False
     return any([True if re.search(regex, string, re.I) else False for regex in list_of_keywords])
+
+
+def return_first_n_dict_items(dict_: dict, n: int) -> dict:
+    return dict(itertools.islice(dict_.items(), n))
+
+
+def format_text(text: str, max_words_on_line: int = 5) -> str:
+    words = text.split(' ')
+    new_str = ''
+    i = 0
+    for word in words:
+        if '\n' in word:
+            i = 0
+        elif i > max_words_on_line - 1:
+            i = 0
+            new_str += '\n'
+        new_str += ' ' + word
+        i += 1
+    return new_str.strip()
+
+
+def display_text_box(text: str, axis = [0, 10, 0, 10], center_v = 5, center_h = 5, fontsize = 20) -> None:
+    fig = plt.figure()
+    plt.axis(axis)
+    plt.text(center_v, center_h, text, ha='center', va='center', wrap=True, fontsize=fontsize)
+    plt.axis('off')
+    plt.grid(visible=None)
+    plt.show()
