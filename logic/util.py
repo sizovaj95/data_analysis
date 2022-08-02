@@ -47,7 +47,7 @@ def format_text(text: str, max_words_on_line: int = 5) -> str:
     return new_str.strip()
 
 
-def display_text_box(text: str, axis = [0, 10, 0, 10], center_v = 5, center_h = 5, fontsize = 20) -> None:
+def display_text_box(text: str, axis=[0, 10, 0, 10], center_v: int = 5, center_h: int = 5, fontsize: int = 20) -> None:
     fig = plt.figure()
     plt.axis(axis)
     plt.text(center_v, center_h, text, ha='center', va='center', wrap=True, fontsize=fontsize)

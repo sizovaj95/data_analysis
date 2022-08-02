@@ -8,9 +8,7 @@ import re
 from collections import defaultdict
 from copy import deepcopy
 from typing import List, Tuple, Dict, Optional, Union
-from nltk.corpus import stopwords
 import time
-stop_words = set(stopwords.words("english"))
 
 output_dir = co.data_dir / co.custom_nlp_model_name
 nlp = spacy.load(output_dir)

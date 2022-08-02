@@ -1,0 +1,11 @@
+ipywidgets
+pandas
+numpy
+wordcloud
+inflect
+seaborn
+matplotlib
+statsmodels
+bioinfokit
+spacy
+nltk
