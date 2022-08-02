@@ -5,3 +5,8 @@ statsmodels
 bioinfokit
 nltk
 spacy
+ipywidgets
+wordcloud
+numpy
+wordcloud
+inflect
